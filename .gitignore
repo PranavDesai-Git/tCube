@@ -16,6 +16,11 @@ obj/
 # Executables
 tCube
 
+# Language Server & Compiler DB
+compile_commands.json
+.cache/
+.clangd/
+
 # IDE and Editor files
 .vscode/
 .idea/

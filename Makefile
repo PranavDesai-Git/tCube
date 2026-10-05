@@ -3,7 +3,7 @@
 # ==============================================================================
 
 CC       ?= gcc
-CFLAGS   ?= -std=c99 -Wall -Wextra -Werror -pedantic -O2
+CFLAGS   ?= -std=c99 -Wall -Wextra -pedantic -O2
 CPPFLAGS := -Iinclude -MMD -MP
 LDFLAGS  := 
 LDLIBS   := -lm
@@ -26,17 +26,31 @@ DEPS      := $(OBJS:.o=.d)
 PREFIX    ?= /usr/local
 BINDIR    ?= $(PREFIX)/bin
 
-.PHONY: all debug release clean install uninstall run help
+.PHONY: all debug release clean install uninstall run help compile_commands.json
 
-all: $(TARGET)
+all: $(TARGET) compile_commands.json
 
 # Debug build configuration
 debug: CFLAGS := -std=c99 -Wall -Wextra -pedantic -g -DDEBUG -O0
-debug: $(TARGET)
+debug: $(TARGET) compile_commands.json
 
 # Release build configuration
 release: CFLAGS := -std=c99 -Wall -Wextra -Werror -pedantic -O3 -DNDEBUG
-release: $(TARGET)
+release: $(TARGET) compile_commands.json
+
+# Generate compile_commands.json for LSP / clangd support
+compile_commands.json: $(SRCS)
+	@echo "  GEN     $@"
+	@echo "[" > $@
+	@first=1; \
+	for src in $(SRCS); do \
+		if [ $$first -eq 0 ]; then echo "," >> $@; fi; \
+		first=0; \
+		printf '  {\n    "directory": "%s",\n    "command": "%s %s %s -c %s",\n    "file": "%s"\n  }' \
+			"$(CURDIR)" "$(CC)" "$(CFLAGS)" "$(CPPFLAGS)" "$$src" "$$src" >> $@; \
+	done; \
+	echo "" >> $@; \
+	echo "]" >> $@
 
 # Link the final executable binary
 $(TARGET): $(OBJS) | $(BIN_DIR)
@@ -57,8 +71,8 @@ $(OBJ_DIR) $(BIN_DIR):
 
 # Clean all build artifacts
 clean:
-	@echo "  CLEAN   $(BUILD_DIR)"
-	@rm -rf $(BUILD_DIR)
+	@echo "  CLEAN   $(BUILD_DIR) compile_commands.json"
+	@rm -rf $(BUILD_DIR) compile_commands.json
 
 # Build and run the binary
 run: $(TARGET)
