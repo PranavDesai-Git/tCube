@@ -1,0 +1,30 @@
+# Build Outputs
+build/
+bin/
+obj/
+
+# Compiled Objects and Libraries
+*.o
+*.obj
+*.d
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Executables
+tCube
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS and Log files
+*.log
+core
+core.*
